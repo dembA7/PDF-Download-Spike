@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cliente del Servidor</title>
+</head>
+<body>
+  <h1>Cliente del Servidor</h1>
+  <div id="serverResponse"></div>
+
+  <script>
+    setInterval(async () => {
+      try {
+        const response = await fetch('http://localhost:3000/download');
+        const blob = await response.blob();
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = 'file.pdf';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error('Error al obtener datos del servidor:', error);
+      }
+    }, 3000);
+  </script>
+</body>
+</html>
