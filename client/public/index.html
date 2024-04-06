@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generar y Descargar PDF</title>
+</head>
+<body>
+  <h1>Generar y Descargar PDF</h1>
+  
+  <script>
+    setInterval(() => {
+      fetch('/get-data-and-pdf')
+        .then(response => response.blob())
+        .then(blob => {
+
+          const downloadLink = document.createElement('a');
+          downloadLink.href = window.URL.createObjectURL(blob);
+          downloadLink.download = 'file.pdf';
+          downloadLink.click();
+        })
+        .catch(error => console.error('Error al obtener PDF del servidor:', error));
+    }, 3000);
+  </script>
+</body>
+</html>
