@@ -11,26 +11,34 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.get('/get-data-and-pdf', (req, res) => {
-  axios.get('http://localhost:3000/get-data')
-    .then(response => {
-      const data = response.data;
-      generatePDF(data);
-      const pdfPath = path.join(__dirname, 'file.pdf');
-      res.sendFile(pdfPath);
-    })
-    .catch(error => {
-      console.error('Error al obtener datos del servidor principal:', error);
-      res.status(500).json({ error: 'Error al obtener datos del servidor principal' });
-    });
+app.get('/get-data-and-pdf', async (req, res) => {
+  try {
+    const response = await axios.get('http://localhost:3000/get-data');
+    const data = response.data;
+    const pdfPath = await generatePDF(data);
+    res.sendFile(pdfPath);
+  } catch (error) {
+    console.error('Error al obtener datos del servidor principal:', error);
+    res.status(500).json({ error: 'Error al obtener datos del servidor principal' });
+  }
 });
 
 
 function generatePDF(data) {
-  const doc = new PDFDocument();
-  doc.pipe(fs.createWriteStream(path.join(__dirname, 'file.pdf')));
-  doc.text(`Datos recibidos del servidor: ${JSON.stringify(data)}`);
-  doc.end();
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument();
+    const pdfPath = path.join(__dirname, 'file.pdf');
+    const writeStream = fs.createWriteStream(pdfPath);
+    doc.pipe(writeStream);
+    doc.text(`Datos recibidos del servidor: ${JSON.stringify(data)}`);
+    doc.end();
+    writeStream.on('finish', () => {
+      resolve(pdfPath);
+    });
+    writeStream.on('error', (error) => {
+      reject(error);
+    });
+  });
 }
 
 const PORT = 4000;
